@@ -14,6 +14,18 @@ int adc_key_in  = 0;
 #define btnSELECT 4
 #define btnNONE   5
 
+int TIME = 0;
+
+void timeInit()
+{
+  TIME = millis();
+}
+
+int time()
+{
+  return millis()-TIME;
+}
+
 // read the buttons
 int read_LCD_buttons()
 {
@@ -29,22 +41,27 @@ int read_LCD_buttons()
  if (adc_key_in < 850)  return btnSELECT;  
 }
 
+
 int dec_bin(int dec)
 {
-  int binaires[] = {1,2,4,8,6,16,32,64,128};
-  int bin[8];
+  int binaires[] = {1,2,4,8,16,32,64,128};
+  int bin[7];
   int i;
   
   for(i=0;i<8;i++)
   {
-    if ((dec%binaires[8-i])==0)
+    if (dec>=binaires[7-i])
+    {
       bin[i] = 1;
+      dec = dec - binaires[7-i];
+    }
     else
       bin[i] = 0;
   }  
   
   for (i=0;i<8;i++)
     Serial.print(bin[i]);
+    Serial.println();
 }
 bool debut = false;
 int pos = 0; //Position de la sonnerie
