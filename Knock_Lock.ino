@@ -15,6 +15,12 @@ int adc_key_in  = 0;
 #define btnNONE   5
 
 int TIME = 0;
+bool DEBUT = false;
+int POSITION_COURANTE = 0; //Position de la sonnerie
+int DELAI = 500; //en millisecondes
+int CODE_COURANT[] = {0,0,0,0,0,0,0,0};
+int CODE_CORRECT[] = {0,1,1,0,1,1,1,0};
+bool PUSHED = false;
 
 void timeInit()
 {
@@ -65,9 +71,8 @@ int dec_bin(int dec)
 
   return *bin;
 }
-bool debut = false;
-int POSITION_COURANTE = 0; //Position de la sonnerie
-int DELAI = 1000; //en millisecondes
+
+
 
 void updatePosition()
 {
@@ -87,6 +92,49 @@ void updatePosition()
   }
 }
 
+void ecouter()
+{
+  Serial.println("Ok");
+  if (!DEBUT) //C'est le premier clic
+  {
+    DEBUT = true;
+    Serial.println("Deb");
+    timeInit();
+  }
+  else
+  {
+    Serial.println("Pas deb");
+    CODE_COURANT[POSITION_COURANTE] = 1;
+  }
+
+
+}
+
+void verifierCode()
+{
+  Serial.println("Verif");
+  //DEBUT = false;
+
+  lcd.clear();
+  int ok=1;
+   for(int i=0;i<8;i++)
+  {
+    if (CODE_COURANT[i]==CODE_CORRECT[i])
+      ok = ok*1;
+    else
+      ok = ok*0;
+    CODE_COURANT[i] = 0;
+  }
+
+  if (ok==1)
+    lcd.print("Code correct");
+  else
+    lcd.print("Faux");
+
+  delay(500);
+  lcd.clear();
+}
+
 void setup() {
   Serial.begin(9600);
   lcd.begin(16, 2);
@@ -97,19 +145,54 @@ void setup() {
 
 void loop() {
 
+
   updatePosition();
   lcd.setCursor(0,0);
   lcd.print("Pos: ");
   lcd.setCursor(5,0);
   lcd.print(POSITION_COURANTE);
+
+  if (POSITION_COURANTE==7)
+  verifierCode();
+
+  for(int i=0;i<8;i++)
+  {
+    lcd.setCursor(i,1);
+    lcd.print(CODE_COURANT[i]);
+  }
+ 
   lcd_key = read_LCD_buttons();  // read the buttons
   switch (lcd_key)               // depending on which button was pushed, we perform an action
   {
-    case btnRIGHT: //Sensor sonore
+    case btnRIGHT: //Reset 
     {
       timeInit();
+      DEBUT = false;
+
+      for(int i=0;i<8;i++)
+      CODE_COURANT[i] = 0;
+
       break;
     }
+
+    case btnDOWN: //Sensor
+    {
+      if (!PUSHED)
+      {
+        ecouter();
+        PUSHED = true;
+      }
+      break;
+    }
+
+    case btnNONE:
+    {
+      if (PUSHED)
+        PUSHED = false;
+      break;
+    }
+
+
   }
 
 }
