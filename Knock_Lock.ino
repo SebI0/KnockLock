@@ -21,7 +21,7 @@ void timeInit()
   TIME = millis();
 }
 
-int time()
+int timer()
 {
   return millis()-TIME;
 }
@@ -62,33 +62,52 @@ int dec_bin(int dec)
   for (i=0;i<8;i++)
     Serial.print(bin[i]);
     Serial.println();
+
+  return *bin;
 }
 bool debut = false;
-int pos = 0; //Position de la sonnerie
+int POSITION_COURANTE = 0; //Position de la sonnerie
+int DELAI = 1000; //en millisecondes
+
+void updatePosition()
+{
+  int leTemps = timer();
+  int i;
+
+  for(i=0;i<9;i++)
+  {
+    if (leTemps>DELAI*i && leTemps<DELAI*(i+1))
+      POSITION_COURANTE = i;
+  }
+ 
+ if(POSITION_COURANTE==8)
+  {
+    POSITION_COURANTE=0;
+    timeInit();
+  }
+}
 
 void setup() {
   Serial.begin(9600);
   lcd.begin(16, 2);
   lcd.print("Lock Knock");
   delay(500);
-  dec_bin(154);
+  lcd.clear();
 }
 
 void loop() {
+
+  updatePosition();
+  lcd.setCursor(0,0);
+  lcd.print("Pos: ");
+  lcd.setCursor(5,0);
+  lcd.print(POSITION_COURANTE);
   lcd_key = read_LCD_buttons();  // read the buttons
   switch (lcd_key)               // depending on which button was pushed, we perform an action
   {
     case btnRIGHT: //Sensor sonore
     {
-      if (!debut) //Si c'est la première sonnerie
-      {
-        //ecouter(0); LOL
-        debut = false;
-      }
-      else
-      {
-        //ecouter(1);
-      }
+      timeInit();
       break;
     }
   }
