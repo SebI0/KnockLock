@@ -21,6 +21,7 @@ int DELAI = 500; //en millisecondes
 int CODE_COURANT[] = {0,0,0,0,0,0,0,0};
 int CODE_CORRECT[] = {0,1,1,0,1,1,1,0};
 bool PUSHED = false;
+int i=0;
 
 void timeInit()
 {
@@ -105,6 +106,9 @@ void ecouter()
   {
     Serial.println("Pas deb");
     CODE_COURANT[POSITION_COURANTE] = 1;
+    //CODE_COURANT[i] = timer();
+    //Serial.print(CODE_COURANT[i]);
+   // i++;
   }
 
 
@@ -192,6 +196,15 @@ void loop() {
       break;
     }
 
+    case btnUP:
+    {
+      Serial.print("Code courant: ");
+      for(int i=0; i<8; i++){
+          Serial.print(CODE_COURANT[i]);
+      }
+      Serial.println();
+      break;
+    }
 
   }
 
